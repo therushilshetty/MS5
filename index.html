@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>StaticsMaster · Problem 5/101 · Beam Reactions</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07090f;--surface:#0d1117;--surface2:#111827;--surface3:#162033;
+  --border:rgba(56,189,248,.13);--divider:rgba(56,189,248,.07);
+  --text:#e2eeff;--muted:#8ba3c9;--faint:#4a607e;
+  --cyan:#38bdf8;--cyan-glow:rgba(56,189,248,.18);
+  --violet:#a78bfa;--violet-glow:rgba(167,139,250,.15);
+  --orange:#fb923c;--orange-glow:rgba(251,146,60,.15);
+  --green:#34d399;--green-glow:rgba(52,211,153,.14);
+  --rose:#fb7185;--rose-glow:rgba(251,113,133,.13);
+  --yellow:#fbbf24;--yellow-glow:rgba(251,191,36,.13);
+  --grid-line:rgba(56,189,248,.04);
+  --font:'Space Grotesk',sans-serif;--mono:'Space Mono',monospace;
+  --r-sm:8px;--r-md:14px;--r-lg:20px;
+}
+[data-theme="light"]{
+  --bg:#f0f4fa;--surface:#fff;--surface2:#f5f9ff;--surface3:#eaf2ff;
+  --border:rgba(14,80,180,.10);--divider:rgba(14,80,180,.06);
+  --text:#0f172a;--muted:#4b6b96;--faint:#94a3b8;
+  --cyan:#0284c7;--cyan-glow:rgba(2,132,199,.10);
+  --violet:#7c3aed;--violet-glow:rgba(124,58,237,.10);
+  --orange:#ea580c;--orange-glow:rgba(234,88,12,.10);
+  --green:#059669;--green-glow:rgba(5,150,105,.10);
+  --rose:#e11d48;--rose-glow:rgba(225,29,72,.10);
+  --yellow:#d97706;--yellow-glow:rgba(217,119,6,.10);
+  --grid-line:rgba(14,80,180,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-font-smoothing:antialiased;scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);
+  background-image:linear-gradient(var(--grid-line) 1px,transparent 1px),linear-gradient(90deg,var(--grid-line) 1px,transparent 1px);
+  background-size:40px 40px;color:var(--text);min-height:100vh;}
+button,input,select{font-family:var(--font);color:var(--text);border:none;outline:none;background:none;cursor:pointer}
+
+.hdr{position:sticky;top:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:0 24px;height:56px;background:color-mix(in srgb,var(--surface) 85%,transparent);border-bottom:1px solid var(--border);backdrop-filter:blur(16px)}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--cyan),var(--violet));display:grid;place-items:center;font-family:var(--mono);font-size:12px;font-weight:700;color:#fff;box-shadow:0 0 20px var(--cyan-glow)}
+.brand-name{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.brand-sub{font-size:10px;color:var(--muted);font-family:var(--mono);letter-spacing:.4px;text-transform:uppercase}
+.hdr-r{display:flex;gap:8px;align-items:center}
+.pill{padding:4px 11px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:1px solid var(--border);color:var(--cyan);background:var(--cyan-glow)}
+.sym-pill{color:var(--violet);background:var(--violet-glow);border-color:rgba(167,139,250,.25)}
+.icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface2);display:grid;place-items:center;transition:.2s}
+.icon-btn:hover{border-color:var(--cyan);background:var(--cyan-glow)}
+
+.layout{display:grid;grid-template-columns:370px 1fr;min-height:calc(100vh - 56px)}
+.sidebar{padding:16px;border-right:1px solid var(--border);background:color-mix(in srgb,var(--surface) 70%,transparent);display:flex;flex-direction:column;gap:12px;overflow-y:auto}
+.main-col{padding:16px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.card-pad{padding:16px}
+.card-head{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px}
+.ibox{width:30px;height:30px;border-radius:8px;display:grid;place-items:center;font-size:13px;flex-shrink:0}
+.ib-cyan{background:var(--cyan-glow);color:var(--cyan);border:1px solid rgba(56,189,248,.25)}
+.ib-violet{background:var(--violet-glow);color:var(--violet);border:1px solid rgba(167,139,250,.25)}
+.ib-orange{background:var(--orange-glow);color:var(--orange);border:1px solid rgba(251,146,60,.25)}
+.ib-green{background:var(--green-glow);color:var(--green);border:1px solid rgba(52,211,153,.25)}
+.ct{font-size:12px;font-weight:700}.cs{font-size:10px;color:var(--muted);margin-top:1px}
+
+.slabel{font-size:9px;font-weight:700;font-family:var(--mono);color:var(--faint);letter-spacing:1px;text-transform:uppercase;padding:8px 0 6px;border-bottom:1px solid var(--divider);margin:4px 0 8px}
+.field{margin-bottom:8px}
+.field label{display:flex;justify-content:space-between;align-items:center;font-size:9px;font-weight:700;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.utag{font-size:9px;font-family:var(--mono);text-transform:none;letter-spacing:0;font-weight:400;padding:1px 6px;border-radius:999px}
+.utag-c{color:var(--cyan);background:var(--cyan-glow);border:1px solid rgba(56,189,248,.2)}
+.utag-v{color:var(--violet);background:var(--violet-glow);border:1px solid rgba(167,139,250,.2)}
+.utag-o{color:var(--orange);background:var(--orange-glow);border:1px solid rgba(251,146,60,.2)}
+.utag-y{color:var(--yellow);background:var(--yellow-glow);border:1px solid rgba(251,191,36,.2)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.iw input{width:100%;padding:8px 11px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;font-size:12px;transition:.2s;color:var(--text)}
+.iw input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-glow)}
+.iw input.err{border-color:var(--rose);box-shadow:0 0 0 3px var(--rose-glow)!important}
+
+.solve-btn{width:100%;padding:11px;border-radius:12px;font-size:13px;font-weight:700;color:#fff;background:linear-gradient(135deg,var(--cyan),var(--violet),var(--orange));box-shadow:0 4px 20px rgba(56,189,248,.2);transition:.25s;position:relative;overflow:hidden;margin-top:10px}
+.solve-btn::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,transparent,rgba(255,255,255,.13),transparent);transform:translateX(-100%);transition:.5s}
+.solve-btn:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(56,189,248,.3)}
+.solve-btn:hover::after{transform:translateX(100%)}
+
+.errmsg{display:none;font-size:11px;color:var(--rose);background:var(--rose-glow);border:1px solid rgba(251,113,133,.25);padding:8px 11px;border-radius:9px;margin-top:8px;line-height:1.6}
+
+.warn-widget{display:none;margin-top:10px;border-radius:12px;border:1.5px solid rgba(251,113,133,.40);background:rgba(251,113,133,.07);overflow:hidden}
+.warn-widget.visible{display:flex;align-items:stretch}
+.warn-accent{width:4px;background:linear-gradient(180deg,#fb7185,#fb923c);flex-shrink:0}
+.warn-text-wrap{padding:10px 12px;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.warn-title{font-size:10px;font-weight:700;font-family:var(--mono);color:#fb7185;letter-spacing:.5px;text-transform:uppercase;margin-bottom:2px}
+.warn-line{font-size:11px;color:#fb7185;line-height:1.7}
+
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.chip{padding:10px;border-radius:12px;background:var(--surface2);border:1px solid var(--border);text-align:center;position:relative;overflow:hidden;transition:.25s}
+.chip:hover{border-color:var(--cyan);transform:translateY(-1px)}
+.chip-acc{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--violet))}
+.ck{font-size:9px;font-weight:700;font-family:var(--mono);letter-spacing:.5px;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
+.cv{font-family:var(--mono);font-size:15px;font-weight:700;line-height:1.2;word-break:break-all}
+.cu{font-size:9px;color:var(--muted);margin-top:2px}
+.chip.big{grid-column:1/-1;background:linear-gradient(135deg,rgba(56,189,248,.06),rgba(167,139,250,.06));border-color:rgba(56,189,248,.3)}
+.chip.big .cv{font-size:18px;color:var(--cyan)}
+.chip.big .chip-acc{background:linear-gradient(90deg,var(--cyan),var(--violet),var(--orange))}
+.chip.Av .cv{color:var(--green)} .chip.Bv .cv{color:var(--orange)}
+
+.fbd-header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border)}
+.tabs{display:flex;gap:3px;background:var(--surface2);padding:3px;border-radius:10px}
+.tab{padding:5px 12px;border-radius:8px;font-size:11px;font-weight:700;color:var(--muted);transition:.2s}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.canvas-zone{position:relative;background:radial-gradient(ellipse at 30% 40%,color-mix(in srgb,var(--cyan-glow) 60%,transparent),transparent 55%),radial-gradient(ellipse at 70% 70%,color-mix(in srgb,var(--violet-glow) 40%,transparent),transparent 50%),var(--bg);display:flex;justify-content:center;align-items:center;padding:20px}
+#fbdCanvas{border-radius:14px;width:100%;max-width:940px;height:auto;display:block;transition:opacity .3s,transform .4s cubic-bezier(.16,1,.3,1);box-shadow:0 8px 40px rgba(0,0,0,.55)}
+#fbdCanvas.switching{opacity:.05;transform:scale(.97)}
+.status{position:absolute;right:28px;bottom:24px;display:none;align-items:center;gap:7px;padding:6px 11px;border-radius:999px;font-size:10px;font-weight:700;border:1px solid var(--border);background:color-mix(in srgb,var(--surface) 80%,transparent);backdrop-filter:blur(8px)}
+.status.on{display:flex}
+.dot{width:6px;height:6px;border-radius:999px;background:var(--green);animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+.steps{display:flex;flex-direction:column}
+.step{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--divider)}
+.step:last-child{border:none}
+.snum{width:24px;height:24px;border-radius:999px;flex-shrink:0;display:grid;place-items:center;font:700 10px var(--mono);color:var(--muted);background:var(--surface2);border:1px solid var(--border)}
+.step.done .snum{background:var(--cyan);border-color:var(--cyan);color:#07090f}
+.stitle{font-size:12px;font-weight:700;margin-bottom:2px}
+.sdesc{font-size:11px;color:var(--muted);line-height:1.6}
+.math{margin-top:5px;padding:6px 10px;border-radius:7px;background:var(--surface2);border-left:3px solid var(--cyan);font:11px var(--mono);color:var(--cyan);line-height:1.9}
+.eqbox{padding:14px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(56,189,248,.05),rgba(167,139,250,.05));border:1px solid rgba(56,189,248,.2);font:13px/1.9 var(--mono);word-break:break-all}
+.case-banner{padding:9px 12px;border-radius:9px;font-size:11px;line-height:1.6;margin-bottom:10px}
+.cb-warn{background:var(--orange-glow);border:1px solid rgba(251,146,60,.3);color:var(--orange)}
+.cb-info{background:var(--cyan-glow);border:1px solid rgba(56,189,248,.3);color:var(--cyan)}
+.cb-rose{background:var(--rose-glow);border:1px solid rgba(251,113,133,.3);color:var(--rose)}
+.cb-green{background:var(--green-glow);border:1px solid rgba(52,211,153,.3);color:var(--green)}
+.notice{padding:12px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);font-size:11px;color:var(--muted);line-height:1.7}
+.help{font-size:10px;color:var(--muted);line-height:1.7;background:var(--surface2);border:1px solid var(--border);padding:9px 11px;border-radius:9px;margin-top:8px}
+.help b{color:var(--cyan)}
+
+@media(max-width:960px){.layout{grid-template-columns:1fr}.sidebar{border-right:none;border-bottom:1px solid var(--border)}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="brand">
+    <div class="logo">SM</div>
+    <div>
+      <div class="brand-name">StaticsMaster</div>
+      <div class="brand-sub">BEAM REACTIONS · PROBLEM 5/101 · UDL ON LEFT HALF</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <div class="pill">Statics</div>
+    <div class="pill sym-pill" id="modeTag">NUMERIC</div>
+    <button class="icon-btn" id="themeBtn" title="Toggle theme">
+      <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"></svg>
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+  <div class="card card-pad">
+    <div class="card-head">
+      <div class="ibox ib-cyan">🔧</div>
+      <div>
+        <div class="ct">Inputs — Enter Your Values</div>
+        <div class="cs">Problem 5/101 · Pin A + Roller B · UDL on left half</div>
+      </div>
+    </div>
+
+    <div class="slabel">Loading</div>
+    <div class="field">
+      <label>UDL intensity w <span class="utag utag-c">kN/m</span></label>
+      <div class="iw"><input id="inp_w" value="6" placeholder="e.g. 6"></div>
+    </div>
+    <div class="help">
+      <b>w (UDL):</b> Uniformly distributed load intensity in kN/m.<br>
+      ✅ Must be <b>positive</b> — load acts <b>downward</b> on the beam.<br>
+      ❌ Negative values mean an upward load — that cannot act on this beam.<br>
+      ℹ️ Zero means no load → both reactions = 0.
+    </div>
+
+    <div class="slabel">Geometry</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Left span a <span class="utag utag-o">mm</span></label>
+        <div class="iw"><input id="inp_a" value="300" placeholder="300"></div>
+      </div>
+      <div class="field">
+        <label>Right span b <span class="utag utag-v">mm</span></label>
+        <div class="iw"><input id="inp_b" value="300" placeholder="300"></div>
+      </div>
+    </div>
+    <div class="help">
+      <b>Geometry:</b><br>
+      · <b>a</b> = length of loaded (left) portion = 300 mm (default)<br>
+      · <b>b</b> = unloaded right portion = 300 mm (default)<br>
+      · Total beam length L = a + b = 600 mm<br>
+      · UDL acts over the <b>left a mm</b> only; right b mm is unloaded.<br>
+      · Equivalent point load R = w × a, acts at centroid = a/2 from A.
+    </div>
+
+    <button class="solve-btn" id="solveBtn">⚡ Solve &amp; Animate</button>
+
+    <div class="warn-widget" id="warnWidget">
+      <div class="warn-accent"></div>
+      <div class="warn-text-wrap">
+        <div class="warn-title">⚠ Input Warning</div>
+        <div class="warn-line" id="warnLines"></div>
+      </div>
+    </div>
+    <div class="errmsg" id="errMsg"></div>
+  </div>
+
+  <div class="card card-pad" id="resultCard" style="display:none">
+    <div class="card-head">
+      <div class="ibox ib-green">✓</div>
+      <div><div class="ct">Results</div><div class="cs">ΣM_A = 0 → By · L = R · (a/2)</div></div>
+    </div>
+    <div id="caseBanner" style="display:none"></div>
+    <div class="rg">
+      <div class="chip"><div class="chip-acc"></div><div class="ck">Equiv. Point Load R</div><div class="cv" id="r_R">—</div><div class="cu">kN</div></div>
+      <div class="chip"><div class="chip-acc"></div><div class="ck">Centroid from A</div><div class="cv" id="r_xc">—</div><div class="cu">m</div></div>
+      <div class="chip"><div class="chip-acc"></div><div class="ck">Total Length L</div><div class="cv" id="r_L">—</div><div class="cu">m</div></div>
+      <div class="chip"><div class="chip-acc"></div><div class="ck">Moment arm ×B</div><div class="cv" id="r_arm">—</div><div class="cu">m</div></div>
+      <div class="chip Bv"><div class="chip-acc"></div><div class="ck">Reaction at B (Roller ↑)</div><div class="cv" id="r_By">—</div><div class="cu">kN</div></div>
+      <div class="chip Av"><div class="chip-acc"></div><div class="ck">Reaction at A (Pin ↑)</div><div class="cv" id="r_Ay">—</div><div class="cu">kN</div></div>
+      <div class="chip big"><div class="chip-acc"></div><div class="ck">Check: Ay + By = R (ΣFy = 0)</div><div class="cv" id="r_check">—</div><div class="cu" id="r_check_unit">kN</div></div>
+    </div>
+  </div>
+</aside>
+
+<main class="main-col">
+  <section class="card">
+    <div class="fbd-header">
+      <div>
+        <div class="ct">Free Body Diagram — Beam with UDL on Left Half (Problem 5/101)</div>
+        <div class="cs">Animated · Pin A + Roller B · UDL → Equivalent Point Load → Reactions</div>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="fbd">Full FBD</button>
+        <button class="tab" data-tab="udl">UDL → Point Load</button>
+        <button class="tab" data-tab="moment">Moment Diagram</button>
+      </div>
+    </div>
+    <div class="canvas-zone" style="min-height:520px">
+      <canvas id="fbdCanvas" width="940" height="500"></canvas>
+      <div class="status" id="statusBadge"><span class="dot"></span><span>Drawing…</span></div>
+    </div>
+  </section>
+
+  <section class="card card-pad">
+    <div class="card-head">
+      <div class="ibox ib-orange">📝</div>
+      <div><div class="ct">Step-by-Step Solution</div><div class="cs">ΣM_A = 0 → By, then ΣFy = 0 → Ay</div></div>
+    </div>
+    <div id="stepsWrap" class="notice">Enter values above and click <strong>⚡ Solve &amp; Animate</strong></div>
+  </section>
+
+  <section class="card card-pad">
+    <div class="card-head">
+      <div class="ibox ib-violet">∑</div>
+      <div><div class="ct">Equilibrium Equations</div><div class="cs">ΣM_A = 0 and ΣFy = 0</div></div>
+    </div>
+    <div class="eqbox" id="eqBox">
+      ΣM_A = 0:  By·L − R·(a/2) = 0 → By = w·a²/(2L)<br>
+      ΣFy = 0:   Ay + By − R = 0 → Ay = R − By = w·a − w·a²/(2L)
+    </div>
+  </section>
+</main>
+</div>
+
+<script>
+/* ══ THEME ══ */
+const root=document.documentElement; let dark=true;
+function setIcon(){
+  document.getElementById('themeIcon').innerHTML=dark
+    ?'<circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/>'
+    :'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+}
+setIcon();
+document.getElementById('themeBtn').addEventListener('click',()=>{
+  dark=!dark;root.setAttribute('data-theme',dark?'dark':'light');setIcon();
+  if(window._P) animateTab(window._P, window._tab||'fbd', true); else drawPlaceholder();
+});
+
+function TH(){
+  return dark?{
+    bg:'#07090f',cvs:'#0d1117',text:'#e2eeff',muted:'#8ba3c9',faint:'#4a607e',
+    beam:'#1e3a5f',beamFill:'rgba(56,140,200,0.25)',beamStroke:'#38bdf8',
+    ground:'#1e293b',gndL:'#334155',
+    udl:'#fb7185',udlFill:'rgba(251,113,133,0.12)',
+    force:'#34d399',
+    Ra:'#34d399',Rb:'#fb923c',
+    moment:'#fb923c',
+    dim:'#a78bfa',arm:'#fbbf24',pt:'#38bdf8',
+    grid:'rgba(56,189,248,.04)',
+    box:'rgba(13,17,23,.92)',boxB:'rgba(56,189,248,.28)',
+    textBg:'rgba(13,17,23,0.82)'
+  }:{
+    bg:'#f0f4fa',cvs:'#ffffff',text:'#0f172a',muted:'#4b6b96',faint:'#94a3b8',
+    beam:'#bfdbfe',beamFill:'rgba(191,219,254,0.4)',beamStroke:'#0284c7',
+    ground:'#e2e8f0',gndL:'#94a3b8',
+    udl:'#e11d48',udlFill:'rgba(225,29,72,0.08)',
+    force:'#059669',
+    Ra:'#059669',Rb:'#ea580c',
+    moment:'#ea580c',
+    dim:'#7c3aed',arm:'#d97706',pt:'#0284c7',
+    grid:'rgba(14,80,180,.04)',
+    box:'rgba(255,255,255,.95)',boxB:'rgba(14,80,180,.25)',
+    textBg:'rgba(255,255,255,0.88)'
+  };
+}
+
+/* ══ PARSE & COMPUTE ══ */
+function getN(id){ const v=parseFloat((document.getElementById(id)||{value:''}).value.trim()); return isNaN(v)?null:v; }
+function fmt(v,d=3){ if(v===null||v===undefined)return '?'; if(!isFinite(v))return '∞'; return Number(v).toFixed(d); }
+function fmtN(v,d=3){ if(!isFinite(v))return '∞'; return Number(v).toFixed(d).replace(/\.?0+$/,''); }
+
+function compute(){
+  const w=getN('inp_w'), aMm=getN('inp_a'), bMm=getN('inp_b');
+  if(w===null||aMm===null||bMm===null) return null;
+
+  const aM   = aMm/1000;          // m
+  const bM   = bMm/1000;          // m
+  const L    = aM + bM;           // total beam length (m)
+  const R    = w * aM;            // equivalent point load (kN)
+  const xc   = aM / 2;           // centroid from A (m)
+  const By   = R * xc / L;       // from ΣM_A = 0
+  const Ay   = R - By;            // from ΣFy = 0
+
+  return {w, aMm, bMm, aM, bM, L, R, xc, By, Ay,
+    zeroW: Math.abs(w)<1e-9,
+    zeroL: L<1e-9
+  };
+}
+
+/* ══ LIVE WARNINGS ══ */
+(function initWarn(){
+  const widget=document.getElementById('warnWidget');
+  const linesEl=document.getElementById('warnLines');
+
+  function check(){
+    const lines=[];
+    ['inp_w','inp_a','inp_b'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('err'); });
+
+    const w=getN('inp_w'), aMm=getN('inp_a'), bMm=getN('inp_b');
+
+    if(w!==null && w<0){
+      document.getElementById('inp_w').classList.add('err');
+      lines.push('❌ <b>Negative UDL (w &lt; 0)</b> is physically invalid for this problem.<br>'+
+        'A negative w would mean the load acts <b>upward</b>, which cannot happen for a gravity-type distributed load.<br>'+
+        'The beam can only be <b>pushed down</b> by the UDL. Enter a positive value.');
+    }
+    if(w!==null && w===0){
+      lines.push('ℹ️ <b>w = 0 kN/m</b> → No load applied → Both reactions Ay = 0 and By = 0 kN.<br>'+
+        'With no external force, the beam is in trivial equilibrium.');
+    }
+    if(aMm!==null && aMm<0){ document.getElementById('inp_a').classList.add('err'); lines.push('❌ <b>Negative span a</b> is physically impossible. Enter a value ≥ 0 mm.'); }
+    if(bMm!==null && bMm<0){ document.getElementById('inp_b').classList.add('err'); lines.push('❌ <b>Negative span b</b> is physically impossible. Enter a value ≥ 0 mm.'); }
+    if(aMm!==null && bMm!==null && aMm+bMm<1e-9){ document.getElementById('inp_a').classList.add('err'); document.getElementById('inp_b').classList.add('err'); lines.push('❌ <b>Total beam length = 0</b>. Both spans cannot be zero simultaneously.'); }
+    if(aMm!==null && aMm===0 && w!==null && w!==0){ lines.push('ℹ️ <b>a = 0</b>: No loaded length → R = 0 → Ay = By = 0. UDL acts over zero span.'); }
+    if(bMm!==null && bMm===0 && aMm!==null && w!==null && w!==0){
+      lines.push('⚠️ <b>b = 0</b>: Roller B is at the same position as the end of the loaded region.<br>By = R/2 (load centroid at L/2 = a/2). Special symmetric-style case.');
+    }
+
+    if(lines.length>0){ linesEl.innerHTML=lines.join('<br><br>'); widget.classList.add('visible'); }
+    else{ widget.classList.remove('visible'); }
+  }
+
+  ['inp_w','inp_a','inp_b'].forEach(id=>{ const el=document.getElementById(id); if(el){ el.addEventListener('input',check); el.addEventListener('change',check); }});
+  check();
+})();
+
+/* ══ VALIDATE (hard block) ══ */
+function validate(){
+  const em=document.getElementById('errMsg');
+  em.style.display='none';
+  ['inp_w','inp_a','inp_b'].forEach(id=>document.getElementById(id).classList.remove('err'));
+
+  const labels={'inp_w':'UDL intensity w','inp_a':'Left span a','inp_b':'Right span b'};
+  for(const id of ['inp_w','inp_a','inp_b']){
+    const el=document.getElementById(id);
+    if(!(el.value||'').trim()){
+      el.classList.add('err');
+      em.textContent=`"${labels[id]}" is empty. Please enter a value.`;
+      em.style.display='block'; return false;
+    }
+    if(isNaN(parseFloat(el.value))){
+      el.classList.add('err');
+      em.textContent=`"${labels[id]}" must be a number.`;
+      em.style.display='block'; return false;
+    }
+  }
+
+  const w=getN('inp_w'), aMm=getN('inp_a'), bMm=getN('inp_b');
+
+  if(w<0){
+    document.getElementById('inp_w').classList.add('err');
+    em.innerHTML='❌ <b>Negative UDL is not allowed.</b><br>'+
+      'A downward UDL must be positive (w > 0 kN/m). A negative value would imply an upward distributed force, '+
+      'which does not act on this beam. Please enter a positive load intensity.';
+    em.style.display='block'; return false;
+  }
+  if(aMm<0){ document.getElementById('inp_a').classList.add('err'); em.textContent='❌ Left span a cannot be negative.'; em.style.display='block'; return false; }
+  if(bMm<0){ document.getElementById('inp_b').classList.add('err'); em.textContent='❌ Right span b cannot be negative.'; em.style.display='block'; return false; }
+  if(aMm+bMm<1e-9){
+    document.getElementById('inp_a').classList.add('err'); document.getElementById('inp_b').classList.add('err');
+    em.textContent='❌ Total beam length (a + b) must be greater than 0.'; em.style.display='block'; return false;
+  }
+  return true;
+}
+
+/* ══ SHOW RESULTS ══ */
+function showResults(p){
+  document.getElementById('resultCard').style.display='block';
+  const banner=document.getElementById('caseBanner'); let bh='';
+  if(p.zeroW){
+    bh=`<div class="case-banner cb-info">ℹ️ w = 0 kN/m → No load applied → Ay = 0 kN and By = 0 kN. Trivial equilibrium — no force, no reaction.</div>`;
+  } else if(p.aMm===0){
+    bh=`<div class="case-banner cb-info">ℹ️ Loaded length a = 0 → Equivalent load R = 0 → Ay = By = 0. UDL acts over zero span.</div>`;
+  } else {
+    bh=`<div class="case-banner cb-green">✅ Standard case: UDL acts over left ${fmtN(p.aMm,0)} mm. Load closer to A → Ay > By. Both reactions upward.</div>`;
+  }
+  banner.innerHTML=bh; banner.style.display=bh?'block':'none';
+
+  function sc(id,val){ document.getElementById(id).textContent=val; }
+  sc('r_R',   fmt(p.R,4));
+  sc('r_xc',  fmt(p.xc,4));
+  sc('r_L',   fmt(p.L,4));
+  sc('r_arm', fmt(p.L,4));
+  sc('r_By',  fmt(p.By,4));
+  sc('r_Ay',  fmt(p.Ay,4));
+  sc('r_check', fmt(p.Ay+p.By,4)+' = '+fmt(p.R,4)+' ✓');
+
+  buildEq(p); buildSteps(p);
+}
+
+function buildEq(p){
+  const gc=dark?'#34d399':'#059669';
+  const oc=dark?'#fb923c':'#ea580c';
+  const yc=dark?'#fbbf24':'#d97706';
+  const vc=dark?'#a78bfa':'#7c3aed';
+  const html=
+    `<span style="color:var(--muted)">Step 1 — Equivalent point load:</span><br>`+
+    `<span style="color:${yc}">R = w × a</span> = ${fmt(p.w,1)} × ${fmt(p.aM,4)} = <b>${fmt(p.R,4)} kN</b>  acting at <span style="color:${yc}">x_c = a/2 = ${fmt(p.xc,4)} m</span> from A<br><br>`+
+    `<span style="color:var(--muted)">Step 2 — Moments about A (ΣM_A = 0):</span><br>`+
+    `<span style="color:${oc}">By × L − R × x_c = 0</span><br>`+
+    `<span style="color:${oc}">By</span> = R×x_c / L = ${fmt(p.R,4)}×${fmt(p.xc,4)} / ${fmt(p.L,4)} = <b>${fmt(p.By,4)} kN ↑</b><br><br>`+
+    `<span style="color:var(--muted)">Step 3 — Vertical equilibrium (ΣFy = 0):</span><br>`+
+    `<span style="color:${gc}">Ay + By = R</span><br>`+
+    `<strong style="color:${gc}">Ay = R − By = ${fmt(p.R,4)} − ${fmt(p.By,4)} = ${fmt(p.Ay,4)} kN ↑</strong>`;
+  document.getElementById('eqBox').innerHTML=html;
+}
+
+function buildSteps(p){
+  const steps=[
+    {t:'1. Identify supports & loading',
+     d:`Beam AB: Pin at A (horizontal + vertical reaction), Roller at B (vertical reaction only). UDL w = ${fmt(p.w,1)} kN/m acts over left ${fmt(p.aMm,0)} mm only. Right ${fmt(p.bMm,0)} mm is unloaded.`,
+     m:`w = ${fmt(p.w,4)} kN/m\na = ${fmt(p.aMm,0)} mm = ${fmt(p.aM,4)} m (loaded span)\nb = ${fmt(p.bMm,0)} mm = ${fmt(p.bM,4)} m (unloaded span)\nL = a + b = ${fmt(p.L,4)} m`},
+    {t:'2. Replace UDL with equivalent point load',
+     d:'A UDL of intensity w over length a is replaced by a single resultant force R = w×a acting at the centroid of the loaded region (a/2 from A).',
+     m:`R = w × a = ${fmt(p.w,4)} × ${fmt(p.aM,4)} = ${fmt(p.R,4)} kN  ↓\nCentroid x_c = a/2 = ${fmt(p.xc,4)} m from A`},
+    {t:'3. Free body diagram & unknowns',
+     d:'With the UDL replaced: three unknowns — Ax (horizontal, = 0 since no horizontal load), Ay (vertical at pin A), and By (vertical at roller B). Two useful equations: ΣM_A = 0 and ΣFy = 0.',
+     m:`Unknowns: Ay (↑), By (↑)\nAx = 0 (no horizontal forces)\nDownward: R = ${fmt(p.R,4)} kN at x = ${fmt(p.xc,4)} m from A`},
+    {t:'4. ΣM_A = 0 → Find By',
+     d:'Taking moments about A eliminates Ay. Counterclockwise positive. By acts upward at distance L from A (CCW), R acts downward at x_c from A (CW).',
+     m:`ΣM_A = 0:\nBy × L − R × x_c = 0\nBy × ${fmt(p.L,4)} = ${fmt(p.R,4)} × ${fmt(p.xc,4)}\nBy = ${fmt(p.R*p.xc,6)} / ${fmt(p.L,4)}\nBy = ${fmt(p.By,4)} kN ↑`},
+    {t:'5. ΣFy = 0 → Find Ay',
+     d:'With By known, apply vertical force equilibrium. Upward forces (Ay + By) must equal downward force (R).',
+     m:`ΣFy = 0:\nAy + By − R = 0\nAy = R − By\nAy = ${fmt(p.R,4)} − ${fmt(p.By,4)}\nAy = ${fmt(p.Ay,4)} kN ↑`},
+    {t:'6. Verification & physical sense',
+     d:`Check: Ay + By = ${fmt(p.Ay,4)} + ${fmt(p.By,4)} = ${fmt(p.Ay+p.By,4)} kN ✓ equals R = ${fmt(p.R,4)} kN. Since load is on the left half (closer to A), reaction Ay > By makes physical sense.`,
+     m:`Ay = ${fmt(p.Ay,4)} kN  (reaction at pin A)\nBy = ${fmt(p.By,4)} kN  (reaction at roller B)\nAy > By ✓ (load closer to A)`}
+  ];
+  document.getElementById('stepsWrap').innerHTML=`<div class="steps">${steps.map((s,i)=>
+    `<div class="step done"><div class="snum">${i+1}</div><div>
+      <div class="stitle">${s.t}</div>
+      <div class="sdesc">${s.d}</div>
+      <div class="math">${s.m.replace(/\n/g,'<br>')}</div>
+    </div></div>`).join('')}</div>`;
+}
+
+/* ══ CANVAS ══ */
+const canvas=document.getElementById('fbdCanvas');
+const ctx=canvas.getContext('2d');
+let _raf=null;
+window._tab='fbd'; window._P=null;
+
+function easeOut(x){return 1-Math.pow(1-Math.max(0,Math.min(1,x)),4);}
+function easeIO(x){x=Math.max(0,Math.min(1,x));return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2;}
+function part(t,a,b){if(t<=a)return 0;if(t>=b)return 1;return easeOut((t-a)/(b-a));}
+
+function arw(x1,y1,x2,y2,col,prog,lbl,lx,ly,lw=3.5){
+  if(prog<=0)return;
+  const p=easeOut(prog);
+  const px=x1+(x2-x1)*p, py=y1+(y2-y1)*p;
+  ctx.save();ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=lw;ctx.lineCap='round';
+  ctx.shadowColor=col;ctx.shadowBlur=14;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(px,py);ctx.stroke();
+  if(prog>0.6){
+    const k=(prog-0.6)/0.4;
+    const ang=Math.atan2(y2-y1,x2-x1),hs=16;
+    ctx.globalAlpha=k;ctx.beginPath();ctx.moveTo(px,py);
+    ctx.lineTo(px-hs*Math.cos(ang-Math.PI/7),py-hs*Math.sin(ang-Math.PI/7));
+    ctx.lineTo(px-hs*Math.cos(ang+Math.PI/7),py-hs*Math.sin(ang+Math.PI/7));
+    ctx.closePath();ctx.fill();
+  }
+  if(lbl&&prog>0.82){
+    ctx.globalAlpha=(prog-0.82)/0.18;ctx.shadowBlur=0;
+    txtBox(lx??x2+8,ly??y2-8,lbl,col,'bold 13px Space Grotesk',ctx.globalAlpha);
+  }
+  ctx.restore();
+}
+
+function dash(x1,y1,x2,y2,col,prog=1,d=[8,5],w=2){
+  if(prog<=0)return;const p=easeOut(prog);
+  ctx.save();ctx.strokeStyle=col;ctx.lineWidth=w;ctx.setLineDash(d);ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x1+(x2-x1)*p,y1+(y2-y1)*p);ctx.stroke();ctx.restore();
+}
+
+function txtBox(x,y,s,col,font,a=1,align='left'){
+  if(a<=0)return;
+  const Th=TH();ctx.save();ctx.globalAlpha=Math.max(0,Math.min(1,a));
+  ctx.font=font||'12px Space Grotesk,sans-serif';
+  ctx.textAlign=align;ctx.textBaseline='middle';
+  const m=ctx.measureText(s);const w=m.width,h=parseInt(ctx.font,10)*1.2;
+  const padX=6,padY=3;let bx=x,by=y-h/2;
+  if(align==='center')bx=x-w/2;if(align==='right')bx=x-w;
+  ctx.fillStyle=Th.textBg;ctx.beginPath();ctx.roundRect(bx-padX,by-padY,w+padX*2,h+padY*2,5);ctx.fill();
+  ctx.fillStyle=col;ctx.fillText(s,x,y);ctx.restore();
+}
+
+function dot(x,y,col,r,lbl,prog,lx,ly){
+  if(prog<=0)return;const p=easeOut(prog);
+  ctx.save();ctx.globalAlpha=p;ctx.shadowColor=col;ctx.shadowBlur=18;
+  ctx.beginPath();ctx.arc(x,y,r*p,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();
+  if(lbl&&prog>0.7){
+    ctx.globalAlpha=(prog-0.7)/0.3;ctx.shadowBlur=0;
+    txtBox(lx??x+10,ly??y-12,lbl,col,'bold 14px Space Grotesk',ctx.globalAlpha);
+  }
+  ctx.restore();
+}
+
+function bgFill(){
+  const t=TH();ctx.fillStyle=t.cvs;ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.strokeStyle=t.grid;ctx.lineWidth=1;
+  for(let x=0;x<canvas.width;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,canvas.height);ctx.stroke()}
+  for(let y=0;y<canvas.height;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(canvas.width,y);ctx.stroke()}
+}
+
+/* ── layout constants ── */
+function getC(p){
+  const CW=canvas.width, CH=canvas.height;
+  const Ax=CW*0.12, Bx=CW*0.88;
+  const beamY=CH*0.52;
+  const beamH=24;
+  const L=p?p.L:0.6;
+  const a=p?p.aM:0.3;
+  const scale=(Bx-Ax)/L;            // px per metre
+  const loadedEndX = Ax + a*scale;  // x where UDL ends
+  return{CW,CH,Ax,Bx,beamY,beamH,L,a,scale,loadedEndX};
+}
+
+/* ── PIN support at A ── */
+function drawPin(cx,cy,col,prog){
+  if(prog<=0)return;const k=easeOut(prog);
+  ctx.save();ctx.globalAlpha=k;ctx.strokeStyle=col;ctx.fillStyle=col;ctx.lineWidth=2;
+  const s=18;
+  ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx-s,cy+s*1.4);ctx.lineTo(cx+s,cy+s*1.4);ctx.closePath();
+  ctx.fillStyle=dark?'rgba(56,189,248,0.18)':'rgba(2,132,199,0.14)';ctx.fill();
+  ctx.strokeStyle=col;ctx.stroke();
+  // hatch ground
+  ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.globalAlpha=k*0.7;
+  for(let i=-2;i<=2;i++) ctx.strokeRect(cx+i*8-s,cy+s*1.4,6,8);
+  ctx.beginPath();ctx.moveTo(cx-s-4,cy+s*1.4);ctx.lineTo(cx+s+4,cy+s*1.4);ctx.stroke();
+  ctx.restore();
+}
+
+/* ── ROLLER support at B ── */
+function drawRoller(cx,cy,col,prog){
+  if(prog<=0)return;const k=easeOut(prog);
+  ctx.save();ctx.globalAlpha=k;ctx.strokeStyle=col;ctx.lineWidth=2;
+  const r=10;
+  ctx.beginPath();ctx.arc(cx,cy+r+6,r,0,Math.PI*2);
+  ctx.fillStyle=dark?'rgba(251,146,60,0.18)':'rgba(234,88,12,0.14)';ctx.fill();ctx.stroke();
+  ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.globalAlpha=k*0.7;
+  ctx.beginPath();ctx.moveTo(cx-s,cy+2*r+10);ctx.lineTo(cx+s,cy+2*r+10);ctx.stroke();
+  for(let i=-2;i<=2;i++) ctx.strokeRect(cx+i*8-s,cy+2*r+10,6,8);
+  ctx.restore();
+}
+
+/* helper local s */
+const s=20;
+
+/* ════════════════════════════════════════════════
+   TAB 1 · Full FBD
+════════════════════════════════════════════════ */
+function drawFBD(p,t){
+  bgFill(); const Th=TH(); const C=getC(p);
+  const t0=part(t,0,.10), t1=part(t,.08,.22), t2=part(t,.20,.38),
+        t3=part(t,.36,.55), t4=part(t,.52,.72), t5=part(t,.68,1.0);
+
+  /* ground line */
+  ctx.save();ctx.globalAlpha=t0;ctx.strokeStyle=Th.gndL;ctx.lineWidth=1.5;ctx.setLineDash([14,7]);
+  ctx.beginPath();ctx.moveTo(0,C.beamY+50);ctx.lineTo(C.CW,C.beamY+50);ctx.stroke();
+  ctx.setLineDash([]);ctx.globalAlpha=t0*0.25;ctx.fillStyle=Th.ground;
+  ctx.fillRect(0,C.beamY+50,C.CW,C.CH);ctx.restore();
+
+  /* beam body */
+  ctx.save();ctx.globalAlpha=easeIO(t1);
+  ctx.fillStyle=Th.beamFill;ctx.strokeStyle=Th.beamStroke;ctx.lineWidth=2;
+  ctx.shadowColor=Th.beamStroke;ctx.shadowBlur=6;
+  ctx.beginPath();ctx.roundRect(C.Ax,C.beamY-C.beamH/2,C.Bx-C.Ax,C.beamH,4);
+  ctx.fill();ctx.stroke();ctx.restore();
+
+  /* supports */
+  drawPin(C.Ax, C.beamY+C.beamH/2, Th.Ra, t1);
+  drawRoller(C.Bx, C.beamY+C.beamH/2, Th.Rb, t1);
+
+  /* labels A B */
+  if(t1>0.5){ const k=(t1-0.5)/0.5;
+    txtBox(C.Ax-6,C.beamY-C.beamH/2-18,'A',Th.Ra,'bold 15px Space Grotesk',k,'center');
+    txtBox(C.Bx+6,C.beamY-C.beamH/2-18,'B',Th.Rb,'bold 15px Space Grotesk',k,'center');
+  }
+
+  /* UDL arrows & region */
+  if(t2>0){
+    const k=easeOut(t2);
+    const numArrows=8;
+    const arrowH=60;
+    const udlTopY=C.beamY-C.beamH/2-arrowH;
+    // shaded region
+    ctx.save();ctx.globalAlpha=k*0.18;ctx.fillStyle=Th.udl;
+    ctx.fillRect(C.Ax,udlTopY,C.loadedEndX-C.Ax,arrowH);ctx.restore();
+    // top line
+    ctx.save();ctx.globalAlpha=k;ctx.strokeStyle=Th.udl;ctx.lineWidth=2.5;
+    ctx.shadowColor=Th.udl;ctx.shadowBlur=8;
+    ctx.beginPath();ctx.moveTo(C.Ax,udlTopY);ctx.lineTo(C.loadedEndX,udlTopY);ctx.stroke();ctx.restore();
+    // arrows
+    for(let i=0;i<=numArrows;i++){
+      const fx=C.Ax+i*(C.loadedEndX-C.Ax)/numArrows;
+      const prog=Math.min(1,k*(1+i*0.04));
+      arw(fx,udlTopY,fx,C.beamY-C.beamH/2,Th.udl,prog,null,0,0,2);
+    }
+    // label
+    if(k>0.6){
+      const mk=(k-0.6)/0.4;
+      txtBox((C.Ax+C.loadedEndX)/2,udlTopY-16,`w = ${fmt(p.w,1)} kN/m`,Th.udl,'bold 14px Space Grotesk',mk,'center');
+    }
+  }
+
+  /* dimension lines */
+  if(t3>0.2){
+    const k=Math.min(1,(t3-0.2)/0.8);
+    const dimY=C.beamY+C.beamH/2+55;
+    ctx.save();ctx.globalAlpha=k;ctx.strokeStyle=Th.dim;ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(C.Ax,C.beamY+C.beamH/2+6);ctx.lineTo(C.Ax,dimY-4);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(C.loadedEndX,C.beamY+C.beamH/2+6);ctx.lineTo(C.loadedEndX,dimY-4);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(C.Bx,C.beamY+C.beamH/2+6);ctx.lineTo(C.Bx,dimY-4);ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.beginPath();ctx.moveTo(C.Ax,dimY-6);ctx.lineTo(C.Ax,dimY+6);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(C.loadedEndX,dimY-6);ctx.lineTo(C.loadedEndX,dimY+6);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(C.Bx,dimY-6);ctx.lineTo(C.Bx,dimY+6);ctx.stroke();
+    ctx.restore();
+    // span a arrow
+    arw(C.Ax,dimY,C.loadedEndX,dimY,Th.dim,k,null,0,0,1.5);
+    arw(C.loadedEndX,dimY,C.Ax,dimY,Th.dim,k,null,0,0,1.5);
+    txtBox((C.Ax+C.loadedEndX)/2,dimY+14,`a = ${fmt(p.aMm,0)} mm`,Th.dim,'bold 11px Space Mono',k,'center');
+    // span b arrow
+    arw(C.loadedEndX,dimY,C.Bx,dimY,Th.arm,k,null,0,0,1.5);
+    arw(C.Bx,dimY,C.loadedEndX,dimY,Th.arm,k,null,0,0,1.5);
+    txtBox((C.loadedEndX+C.Bx)/2,dimY+14,`b = ${fmt(p.bMm,0)} mm`,Th.arm,'bold 11px Space Mono',k,'center');
+  }
+
+  /* reactions */
+  const reacLen=70;
+  arw(C.Ax,C.beamY+C.beamH/2+40,C.Ax,C.beamY-C.beamH/2-14,Th.Ra,t4,
+      `Ay=${fmt(p.Ay,3)} kN`,C.Ax-80,C.beamY+C.beamH/2+20,3.5);
+  arw(C.Bx,C.beamY+C.beamH/2+40,C.Bx,C.beamY-C.beamH/2-14,Th.Rb,t4,
+      `By=${fmt(p.By,3)} kN`,C.Bx+8,C.beamY+C.beamH/2+20,3.5);
+
+  /* result box */
+  if(t5>0.4){
+    const k=(t5-0.4)/0.6;
+    const bw=260,bh=90,bx=C.CW/2-bw/2,by=14;
+    ctx.save();ctx.globalAlpha=k;ctx.fillStyle=Th.box;ctx.strokeStyle=Th.boxB;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,14);ctx.fill();ctx.stroke();ctx.restore();
+    txtBox(C.CW/2,by+20,`w=${fmt(p.w,1)} kN/m  a=${fmt(p.aMm,0)}mm  b=${fmt(p.bMm,0)}mm`,Th.muted,'11px Space Grotesk',k,'center');
+    txtBox(C.CW/2,by+44,`R = ${fmt(p.R,4)} kN  at x = ${fmt(p.xc*1000,0)} mm from A`,dark?'#fbbf24':'#d97706','12px Space Mono',k,'center');
+    txtBox(C.CW/2,by+64,`Ay = ${fmt(p.Ay,4)} kN`,Th.Ra,'bold 14px Space Mono',k,'center');
+    txtBox(C.CW/2,by+84,`By = ${fmt(p.By,4)} kN`,Th.Rb,'bold 14px Space Mono',k,'center');
+  }
+
+  /* legend */
+  const legend=[
+    {c:Th.udl,  l:`UDL w = ${fmt(p.w,1)} kN/m (left ${fmt(p.aMm,0)} mm)`},
+    {c:Th.dim,  l:`a = ${fmt(p.aMm,0)} mm (loaded), b = ${fmt(p.bMm,0)} mm (unloaded)`},
+    {c:Th.Ra,   l:`Ay = ${fmt(p.Ay,4)} kN ↑ (Pin A)`},
+    {c:Th.Rb,   l:`By = ${fmt(p.By,4)} kN ↑ (Roller B)`},
+  ];
+  ctx.save();ctx.globalAlpha=t5;
+  legend.forEach((it,i)=>{
+    ctx.shadowColor=it.c;ctx.shadowBlur=4;
+    ctx.fillStyle=it.c;ctx.fillRect(14,20+i*20,10,3);
+    ctx.shadowBlur=0;ctx.fillStyle=Th.text;
+    ctx.font='10px Space Grotesk,sans-serif';ctx.textBaseline='middle';
+    ctx.fillText(it.l,28,22+i*20);
+  });
+  ctx.restore();
+}
+
+/* ════════════════════════════════════════════════
+   TAB 2 · UDL → Point Load
+════════════════════════════════════════════════ */
+function drawUDL(p,t){
+  bgFill(); const Th=TH(); const C=getC(p);
+  const t0=part(t,0,.12), t1=part(t,.10,.28), t2=part(t,.26,.50),
+        t3=part(t,.48,.70), t4=part(t,.68,1.0);
+
+  /* beam outline */
+  ctx.save();ctx.globalAlpha=easeIO(t0);
+  ctx.fillStyle=Th.beamFill;ctx.strokeStyle=Th.beamStroke;ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(C.Ax,C.beamY-C.beamH/2,C.Bx-C.Ax,C.beamH,4);ctx.fill();ctx.stroke();
+  drawPin(C.Ax,C.beamY+C.beamH/2,Th.Ra,t0);
+  drawRoller(C.Bx,C.beamY+C.beamH/2,Th.Rb,t0);
+  ctx.restore();
+
+  /* UDL block */
+  if(t1>0){
+    const k=easeOut(t1);
+    const arrowH=60;
+    const udlTopY=C.beamY-C.beamH/2-arrowH;
+    ctx.save();ctx.globalAlpha=k*0.2;ctx.fillStyle=Th.udl;
+    ctx.fillRect(C.Ax,udlTopY,C.loadedEndX-C.Ax,arrowH);ctx.restore();
+    ctx.save();ctx.globalAlpha=k;ctx.strokeStyle=Th.udl;ctx.lineWidth=2.5;
+    ctx.beginPath();ctx.moveTo(C.Ax,udlTopY);ctx.lineTo(C.loadedEndX,udlTopY);ctx.stroke();ctx.restore();
+    for(let i=0;i<=8;i++){
+      const fx=C.Ax+i*(C.loadedEndX-C.Ax)/8;
+      arw(fx,udlTopY,fx,C.beamY-C.beamH/2,Th.udl,k,null,0,0,2);
+    }
+    txtBox((C.Ax+C.loadedEndX)/2,udlTopY-16,`w = ${fmt(p.w,1)} kN/m`,Th.udl,'bold 14px Space Grotesk',k,'center');
+    txtBox(C.Ax-2,udlTopY-16,'A',Th.Ra,'bold 14px Space Grotesk',k,'right');
+    txtBox(C.Bx+4,C.beamY-C.beamH/2-16,'B',Th.Rb,'bold 14px Space Grotesk',k);
+  }
+
+  /* centroid dot and arrow for R */
+  if(t2>0){
+    const k=easeOut(t2);
+    const centX=C.Ax+p.xc*C.scale;
+    const arrowH=60;
+    const udlTopY=C.beamY-C.beamH/2-arrowH;
+
+    // dashed centroid vertical
+    dash(centX,C.beamY-C.beamH/2-arrowH-10,centX,C.beamY+C.beamH/2+20,Th.arm,k,[5,3],1.5);
+
+    // Big resultant arrow
+    arw(centX,C.beamY-C.beamH/2-arrowH-10,centX,C.beamY-C.beamH/2,Th.force,k,
+        `R = w·a = ${fmt(p.R,3)} kN`,centX+8,C.beamY-C.beamH/2-arrowH+10,4.5);
+
+    // label centroid
+    txtBox(centX,C.beamY+C.beamH/2+20,`x_c = a/2 = ${fmt(p.xc*1000,0)} mm from A`,Th.arm,'bold 12px Space Mono',k,'center');
+    dot(centX,C.beamY-C.beamH/2,Th.arm,6,null,k);
+  }
+
+  /* dimension annotations */
+  if(t3>0.2){
+    const k=Math.min(1,(t3-0.2)/0.8);
+    const centX=C.Ax+p.xc*C.scale;
+    const dimY=C.beamY+C.beamH/2+55;
+    ctx.save();ctx.globalAlpha=k;ctx.strokeStyle=Th.dim;ctx.lineWidth=1.2;ctx.setLineDash([4,3]);
+    [C.Ax,centX,C.loadedEndX,C.Bx].forEach(x=>{
+      ctx.beginPath();ctx.moveTo(x,C.beamY+C.beamH/2+6);ctx.lineTo(x,dimY-4);ctx.stroke();
+      ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(x,dimY-6);ctx.lineTo(x,dimY+6);ctx.stroke();ctx.setLineDash([4,3]);
+    });
+    ctx.setLineDash([]);ctx.restore();
+    arw(C.Ax,dimY,centX,dimY,Th.arm,k,null,0,0,1.5);
+    arw(centX,dimY,C.Ax,dimY,Th.arm,k,null,0,0,1.5);
+    txtBox((C.Ax+centX)/2,dimY+14,`a/2=${fmt(p.xc*1000,0)} mm`,Th.arm,'bold 10px Space Mono',k,'center');
+    arw(C.Ax,dimY+32,C.loadedEndX,dimY+32,Th.dim,k,null,0,0,1.5);
+    arw(C.loadedEndX,dimY+32,C.Ax,dimY+32,Th.dim,k,null,0,0,1.5);
+    txtBox((C.Ax+C.loadedEndX)/2,dimY+46,`a = ${fmt(p.aMm,0)} mm`,Th.dim,'bold 10px Space Mono',k,'center');
+  }
+
+  /* summary box */
+  if(t4>0.4){
+    const k=(t4-0.4)/0.6;
+    const bw=290,bh=78,bx=C.CW-bw-14,by=14;
+    ctx.save();ctx.globalAlpha=k;ctx.fillStyle=Th.box;ctx.strokeStyle=Th.boxB;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,14);ctx.fill();ctx.stroke();ctx.restore();
+    txtBox(bx+bw/2,by+18,'UDL → Equivalent Point Load',Th.muted,'700 11px Space Grotesk',k,'center');
+    txtBox(bx+bw/2,by+38,`R = w × a = ${fmt(p.w,1)} × ${fmt(p.aM,4)} = ${fmt(p.R,4)} kN`,dark?'#fbbf24':'#d97706','bold 12px Space Mono',k,'center');
+    txtBox(bx+bw/2,by+60,`Acts at centroid: x_c = a/2 = ${fmt(p.xc*1000,0)} mm from A`,Th.arm,'12px Space Mono',k,'center');
+  }
+}
+
+/* ════════════════════════════════════════════════
+   TAB 3 · Moment equilibrium diagram
+════════════════════════════════════════════════ */
+function drawMoment(p,t){
+  bgFill(); const Th=TH(); const C=getC(p);
+  const t0=part(t,0,.12), t1=part(t,.10,.28), t2=part(t,.26,.48),
+        t3=part(t,.46,.68), t4=part(t,.66,1.0);
+
+  /* beam */
+  ctx.save();ctx.globalAlpha=easeIO(t0);
+  ctx.fillStyle=Th.beamFill;ctx.strokeStyle=Th.beamStroke;ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(C.Ax,C.beamY-C.beamH/2,C.Bx-C.Ax,C.beamH,4);ctx.fill();ctx.stroke();
+  drawPin(C.Ax,C.beamY+C.beamH/2,Th.Ra,t0);
+  drawRoller(C.Bx,C.beamY+C.beamH/2,Th.Rb,t0);
+  ctx.restore();
+  if(t0>0.4){ const k=(t0-0.4)/0.6;
+    txtBox(C.Ax,C.beamY-C.beamH/2-18,'A',Th.Ra,'bold 14px Space Grotesk',k,'center');
+    txtBox(C.Bx,C.beamY-C.beamH/2-18,'B',Th.Rb,'bold 14px Space Grotesk',k,'center');
+  }
+
+  /* equivalent load */
+  const centX=C.Ax+p.xc*C.scale;
+  arw(centX,C.beamY-C.beamH/2-80,centX,C.beamY-C.beamH/2,Th.force,t1,
+      `R = ${fmt(p.R,3)} kN`,centX+8,C.beamY-C.beamH/2-60,4.5);
+  dot(centX,C.beamY-C.beamH/2,Th.arm,5,null,t1);
+
+  /* moment arm from A to R */
+  if(t2>0){
+    const k=easeOut(t2);
+    const armY=C.beamY+C.beamH/2+42;
+    dash(C.Ax,C.beamY+C.beamH/2+6,C.Ax,armY+4,Th.Ra,k,[4,3],1.5);
+    dash(centX,C.beamY+C.beamH/2+6,centX,armY+4,Th.arm,k,[4,3],1.5);
+    arw(C.Ax,armY,centX,armY,Th.arm,k,null,0,0,2);
+    arw(centX,armY,C.Ax,armY,Th.arm,k,null,0,0,2);
+    txtBox((C.Ax+centX)/2,armY+14,`x_c = ${fmt(p.xc*1000,0)} mm (arm for R about A)`,Th.arm,'bold 11px Space Mono',k,'center');
+    // CW moment label
+    if(k>0.5){const mk=(k-0.5)/0.5;
+      txtBox(centX+14,C.beamY-C.beamH/2-30,`CW ↻  M_R = R×x_c = ${fmt(p.R*p.xc,4)} kN·m`,dark?'#fb7185':'#e11d48','bold 12px Space Grotesk',mk);
+    }
+  }
+
+  /* moment arm L for By */
+  if(t3>0){
+    const k=easeOut(t3);
+    const armY2=C.beamY+C.beamH/2+75;
+    dash(C.Ax,C.beamY+C.beamH/2+6,C.Ax,armY2+4,Th.Ra,k,[4,3],1.5);
+    dash(C.Bx,C.beamY+C.beamH/2+6,C.Bx,armY2+4,Th.Rb,k,[4,3],1.5);
+    arw(C.Ax,armY2,C.Bx,armY2,Th.Rb,k,null,0,0,2);
+    arw(C.Bx,armY2,C.Ax,armY2,Th.Rb,k,null,0,0,2);
+    txtBox((C.Ax+C.Bx)/2,armY2+14,`L = ${fmt(p.L*1000,0)} mm (arm for By about A)`,Th.Rb,'bold 11px Space Mono',k,'center');
+    arw(C.Bx,C.beamY+C.beamH/2+40,C.Bx,C.beamY-C.beamH/2-14,Th.Rb,k,
+        `By=${fmt(p.By,3)} kN`,C.Bx+8,C.beamY+C.beamH/2+20,3.5);
+    if(k>0.5){const mk=(k-0.5)/0.5;
+      txtBox(C.Bx-10,C.beamY-C.beamH/2-40,`CCW ↺  By×L = ${fmt(p.By*p.L,4)} kN·m`,dark?'#34d399':'#059669','bold 12px Space Grotesk',mk,'right');
+    }
+  }
+
+  /* reaction Ay */
+  arw(C.Ax,C.beamY+C.beamH/2+40,C.Ax,C.beamY-C.beamH/2-14,Th.Ra,t3,
+      `Ay=${fmt(p.Ay,3)} kN`,C.Ax-90,C.beamY+C.beamH/2+20,3.5);
+
+  /* equation box */
+  if(t4>0.3){
+    const k=(t4-0.3)/0.7;
+    const bw=320,bh=110,bx=14,by=14;
+    ctx.save();ctx.globalAlpha=k;ctx.fillStyle=Th.box;ctx.strokeStyle=Th.boxB;ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.roundRect(bx,by,bw,bh,14);ctx.fill();ctx.stroke();ctx.restore();
+    txtBox(bx+bw/2,by+18,'ΣM_A = 0  (CCW positive)',Th.muted,'700 11px Space Grotesk',k,'center');
+    txtBox(bx+bw/2,by+38,`By × L  −  R × x_c = 0`,Th.muted,'12px Space Mono',k,'center');
+    txtBox(bx+bw/2,by+58,`By × ${fmt(p.L,4)} = ${fmt(p.R,4)} × ${fmt(p.xc,4)}`,dark?'#fbbf24':'#d97706','12px Space Mono',k,'center');
+    txtBox(bx+bw/2,by+78,`By = ${fmt(p.By,4)} kN`,Th.Rb,'bold 15px Space Mono',k,'center');
+    txtBox(bx+bw/2,by+98,`Ay = R − By = ${fmt(p.Ay,4)} kN`,Th.Ra,'bold 15px Space Mono',k,'center');
+  }
+}
+
+/* ════════════════════════════════════════════════
+   PLACEHOLDER
+════════════════════════════════════════════════ */
+function drawPlaceholder(){
+  bgFill(); const Th=TH();
+  const C=getC(null);
+  const cx=canvas.width/2, cy=canvas.height/2;
+  // faint beam
+  ctx.save();ctx.globalAlpha=0.18;
+  ctx.fillStyle=Th.beamFill;ctx.strokeStyle=Th.beamStroke;ctx.lineWidth=2;
+  ctx.beginPath();ctx.roundRect(C.Ax,C.beamY-C.beamH/2,C.Bx-C.Ax,C.beamH,4);ctx.fill();ctx.stroke();
+  // faint UDL lines
+  for(let i=0;i<=6;i++){
+    const fx=C.Ax+i*(C.loadedEndX-C.Ax)/6;
+    ctx.strokeStyle=Th.udl;ctx.lineWidth=1.5;ctx.beginPath();
+    ctx.moveTo(fx,C.beamY-C.beamH/2-50);ctx.lineTo(fx,C.beamY-C.beamH/2);ctx.stroke();
+  }
+  ctx.strokeStyle=Th.udl;ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(C.Ax,C.beamY-C.beamH/2-50);ctx.lineTo(C.loadedEndX,C.beamY-C.beamH/2-50);ctx.stroke();
+  ctx.restore();
+  ctx.save();ctx.globalAlpha=0.75;
+  txtBox(cx,cy-48,'⚡ Enter UDL and spans, then click Solve & Animate',Th.text,'700 18px Space Grotesk',1,'center');
+  txtBox(cx,cy-22,'Pin at A · Roller at B · UDL on left half only',Th.muted,'14px Space Grotesk',1,'center');
+  txtBox(cx,cy+10,'Downward UDL → positive w  |  Upward load is invalid',Th.udl,'12px Space Grotesk',0.9,'center');
+  txtBox(cx,cy+110,'Default: w=6 kN/m, a=300 mm, b=300 mm',Th.muted,'12px Space Grotesk',0.55,'center');
+  txtBox(cx,cy+130,'Expected: Ay = 1.35 kN, By = 0.45 kN',Th.faint,'12px Space Grotesk',0.55,'center');
+  ctx.restore();
+}
+
+/* ════════════════════════════════════════════════
+   ANIMATE
+════════════════════════════════════════════════ */
+function animateTab(p,tab,sw=false){
+  if(_raf){cancelAnimationFrame(_raf);_raf=null}
+  const badge=document.getElementById('statusBadge');
+  function go(){
+    badge.classList.add('on');
+    const dur=2400, start=performance.now();
+    function frame(now){
+      const t=Math.min((now-start)/dur,1);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      if(tab==='fbd')      drawFBD(p,t);
+      else if(tab==='udl') drawUDL(p,t);
+      else                 drawMoment(p,t);
+      if(t<1){_raf=requestAnimationFrame(frame)}
+      else{badge.classList.remove('on')}
+    }
+    _raf=requestAnimationFrame(frame);
+  }
+  if(sw){
+    canvas.classList.add('switching');
+    setTimeout(()=>{canvas.classList.remove('switching');go()},280);
+  } else go();
+}
+
+/* ════════════════════════════════════════════════
+   EVENTS
+════════════════════════════════════════════════ */
+document.getElementById('solveBtn').addEventListener('click',()=>{
+  document.getElementById('errMsg').style.display='none';
+  if(!validate())return;
+  const p=compute();
+  if(!p){
+    document.getElementById('errMsg').textContent='Unable to compute. Check all fields.';
+    document.getElementById('errMsg').style.display='block'; return;
+  }
+  window._P=p;
+  showResults(p);
+  animateTab(p,window._tab||'fbd',false);
+});
+
+document.querySelectorAll('.tab').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===btn));
+    window._tab=btn.dataset.tab;
+    if(window._P) animateTab(window._P,window._tab,true);
+    else drawPlaceholder();
+  });
+});
+
+document.querySelectorAll('.iw input').forEach(el=>el.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('solveBtn').click()}));
+
+drawPlaceholder();
+</script>
+</body>
+</html>
